@@ -1,6 +1,6 @@
-Project Description: Shopify Admin Dashboard ( Polaris + Next.js)
+Project Description: Shopify Product Table ( Polaris + Next.js)
 
-This project is a Shopify-like admin dashboard built using React, Next.js, and Shopify Polaris components. 
+This project is a Shopify Product Table built using React, Next.js, and Shopify Polaris components. 
 It simulates a product management interface where users can view, filter, and interact with products while tracking analytics.
 
 Key Features:
