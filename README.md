@@ -1,6 +1,50 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+Project Description: Shopify Admin Dashboard ( Polaris + Next.js)
 
-## Getting Started
+This project is a Shopify-like admin dashboard built using React, Next.js, and Shopify Polaris components. 
+It simulates a product management interface where users can view, filter, and interact with products while tracking analytics.
+
+Key Features:
+
+Product Table:
+
+Displays a list of products fetched from fakestoreapi.com.
+Columns include product image, name, status (Active/Draft), inventory, type, and vendor.
+Clicking a product opens a modal with detailed information.
+Filters & Search
+Text search for product names.
+Filter by category, availability, vendor, and product type.
+Filters can be applied via a modal for additional options.
+
+Tabs
+
+Products can be viewed by status: All, Active, Draft, Archived.
+Tab selection dynamically updates the displayed products.
+Analytics Tracking
+Tracks product views and modal open/close times using a local analytics store (data.js).
+Sends actions like open or close to the analytics API (route.js) and optionally to Gemini 3.
+Enables monitoring user interactions and engagement.
+Integration with Gemini 3 (Optional)
+Actions like opening a product or closing a modal can be sent to Gemini 3 for real-time analytics or external dashboards.
+
+UI Components
+
+Built entirely with Shopify Polaris: Cards, Buttons, Tabs, Modals, Badges, IndexTable, and Select components.
+Fully responsive and interactive, providing a professional admin experience.
+
+Next.js Features
+
+Server-side rendering for fast page loads.
+API routes (route.js) handle analytics POST/GET requests.
+
+Tech Stack:
+
+Frontend: React, Next.js, Shopify Polaris
+API / Backend: Next.js API routes (route.js)
+State Management: React useState, useEffect
+Deployment: Can be deployed on Netlify 
+
+Use Case:
+This dashboard is a demo/admin interface for e-commerce stores to manage products, monitor interactions, and analyze user behavior. It can be extended to real Shopify stores or integrated with other e-commerce platforms.
 
 First, run the development server:
 
@@ -16,21 +60,3 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
