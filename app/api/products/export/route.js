@@ -4,28 +4,23 @@ import Product from "../../../models/Product";
 
 export async function GET(req) {
   try {
-    console.log("Connecting to MongoDB...");
     await connectDB();
-    console.log("MongoDB connected");
 
-    console.log("Fetching fake store products...");
-    const fakeStoreRes = await fetch("https://fakestoreapi.com/products");
-
-    if (!fakeStoreRes.ok) {
-      console.error(
-        "Failed to fetch fake store products:",
-        fakeStoreRes.status
-      );
-      throw new Error("Failed to fetch fake store products");
+    // Fetch fake store products safely
+    let fakeStoreProducts = [];
+    try {
+      const res = await fetch("https://fakestoreapi.com/products");
+      if (res.ok) {
+        fakeStoreProducts = await res.json();
+      } else {
+        console.warn("Fake store API responded with status:", res.status);
+      }
+    } catch (err) {
+      console.warn("Failed to fetch fake store products:", err.message);
     }
 
-    const fakeStoreProducts = await fakeStoreRes.json();
-
-    console.log("Fake store products fetched:", fakeStoreProducts.length);
-
-    console.log("Fetching products from MongoDB...");
+    // Fetch MongoDB products
     const dbProducts = await Product.find();
-    console.log("MongoDB products fetched:", dbProducts.length);
 
     // Combine products
     const combinedProducts = [
@@ -51,8 +46,6 @@ export async function GET(req) {
       })),
     ];
 
-    console.log("Combined products count:", combinedProducts.length);
-
     // Convert to CSV
     const csvHeader =
       "title,description,price,category,image,inventory,vendor,status";
@@ -62,7 +55,6 @@ export async function GET(req) {
     );
     const csv = [csvHeader, ...csvRows].join("\n");
 
-    console.log("Returning CSV...");
     return new Response(csv, {
       headers: {
         "Content-Type": "text/csv",
