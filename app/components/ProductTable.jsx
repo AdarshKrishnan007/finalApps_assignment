@@ -239,11 +239,6 @@ export default function ShopifyAdminDemo() {
               className: "white-button",
               onClick: () => fileInputRef.current?.click(),
             },
-            {
-              content: "More Options",
-              icon: MenuHorizontalIcon,
-              className: "white-button",
-            },
           ]}
         >
           <Card sectioned>
