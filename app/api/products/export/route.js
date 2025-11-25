@@ -4,15 +4,18 @@ import Product from "../../../models/Product";
 
 export async function GET(req) {
   try {
-    // Connect to MongoDB at runtime
+    console.log("Connecting to MongoDB...");
     await connectDB();
+    console.log("MongoDB connected");
 
-    // Fetch fake store products at runtime
+    console.log("Fetching fake store products...");
     const fakeStoreRes = await fetch("https://fakestoreapi.com/products");
     const fakeStoreProducts = await fakeStoreRes.json();
+    console.log("Fake store products fetched:", fakeStoreProducts.length);
 
-    // Fetch products from MongoDB
+    console.log("Fetching products from MongoDB...");
     const dbProducts = await Product.find();
+    console.log("MongoDB products fetched:", dbProducts.length);
 
     // Combine products
     const combinedProducts = [
@@ -38,6 +41,8 @@ export async function GET(req) {
       })),
     ];
 
+    console.log("Combined products count:", combinedProducts.length);
+
     // Convert to CSV
     const csvHeader =
       "title,description,price,category,image,inventory,vendor,status";
@@ -47,6 +52,7 @@ export async function GET(req) {
     );
     const csv = [csvHeader, ...csvRows].join("\n");
 
+    console.log("Returning CSV...");
     return new Response(csv, {
       headers: {
         "Content-Type": "text/csv",
@@ -55,6 +61,9 @@ export async function GET(req) {
     });
   } catch (err) {
     console.error("Export error:", err);
-    return new Response("Internal Server Error", { status: 500 });
+    return new Response(
+      JSON.stringify({ error: err.message || "Internal Server Error" }),
+      { status: 500, headers: { "Content-Type": "application/json" } }
+    );
   }
 }
