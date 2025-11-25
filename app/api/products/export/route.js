@@ -10,7 +10,17 @@ export async function GET(req) {
 
     console.log("Fetching fake store products...");
     const fakeStoreRes = await fetch("https://fakestoreapi.com/products");
+
+    if (!fakeStoreRes.ok) {
+      console.error(
+        "Failed to fetch fake store products:",
+        fakeStoreRes.status
+      );
+      throw new Error("Failed to fetch fake store products");
+    }
+
     const fakeStoreProducts = await fakeStoreRes.json();
+
     console.log("Fake store products fetched:", fakeStoreProducts.length);
 
     console.log("Fetching products from MongoDB...");
