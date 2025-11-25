@@ -10,6 +10,7 @@ import {
   TextField,
   Select,
   IndexTable,
+  ButtonGroup,
   Badge,
   Modal,
   Text,
@@ -21,6 +22,7 @@ import {
   ImportIcon,
   MenuHorizontalIcon,
 } from "@shopify/polaris-icons";
+import { useRef } from "react";
 
 const IMAGE_URL = "/mnt/data/1d803b97-c131-4765-8460-a99d368beadb.png";
 
@@ -39,27 +41,56 @@ export default function ShopifyAdminDemo() {
     vendor: { company123: false, boringRock: false, rustic: false },
   });
 
+  const [addOpen, setAddOpen] = useState(false);
+  const [newProduct, setNewProduct] = useState({
+    title: "",
+    description: "",
+    price: "",
+    category: "",
+    vendor: "",
+    inventory: "",
+    image: "",
+    status: "Active",
+  });
+  const fileInputRef = useRef(null);
+
   // Load products
   useEffect(() => {
     async function load() {
       try {
-        const res = await fetch("https://fakestoreapi.com/products");
-        const data = await res.json();
-        const enriched = data.map((p, i) => ({
+        // 1. Load FakeStore API products
+        const fakeRes = await fetch("https://fakestoreapi.com/products");
+        const fakeData = await fakeRes.json();
+        const enrichedFake = fakeData.map((p, i) => ({
           ...p,
           status: i % 4 === 0 ? "Active" : "Draft",
           inventory: Math.floor(Math.random() * 2000) - 150,
           vendor: ["Rustic LTD", "Boring Rock", "Company 123", "partnersdemo"][
             i % 4
           ],
+          source: "fake", // helps if you want to identify later
         }));
-        setProducts(enriched);
+
+        // 2. Load MongoDB products
+        const dbRes = await fetch("/api/products");
+        const dbData = await dbRes.json();
+        const enrichedDb = dbData.map((p) => ({
+          ...p,
+          source: "db",
+        }));
+
+        // 3. Combine both
+        const combined = [...enrichedDb, ...enrichedFake];
+
+        // 4. Show them
+        setProducts(combined);
       } catch (e) {
         console.error(e);
       } finally {
         setLoading(false);
       }
     }
+
     load();
   }, []);
 
@@ -190,10 +221,24 @@ export default function ShopifyAdminDemo() {
       <Frame>
         <Page
           title="Products"
-          primaryAction={{ content: "Add Product", icon: PlusIcon }}
+          primaryAction={{
+            content: "Add Product",
+            icon: PlusIcon,
+            onAction: () => setAddOpen(true),
+          }}
           secondaryActions={[
-            { content: "Export", icon: ExportIcon, className: "white-button" },
-            { content: "Import", icon: ImportIcon, className: "white-button" },
+            {
+              content: "Export",
+              icon: ExportIcon,
+              className: "white-button",
+              onClick: () => (window.location.href = "/api/products/export"),
+            },
+            {
+              content: "Import",
+              icon: ImportIcon,
+              className: "white-button",
+              onClick: () => fileInputRef.current?.click(),
+            },
             {
               content: "More Options",
               icon: MenuHorizontalIcon,
@@ -292,6 +337,27 @@ export default function ShopifyAdminDemo() {
                 ))}
               </IndexTable>
             </div>
+
+            {/* ---- HIDDEN FILE INPUT MUST BE ADDED HERE ---- */}
+            <input
+              type="file"
+              accept=".csv"
+              ref={fileInputRef}
+              style={{ display: "none" }}
+              onChange={async (e) => {
+                const file = e.target.files[0];
+                const text = await file.text();
+
+                await fetch("/api/products/import", {
+                  method: "POST",
+                  body: text,
+                });
+
+                // Reload products
+                const res = await fetch("/api/products");
+                setProducts(await res.json());
+              }}
+            />
           </Card>
 
           <Modal
@@ -412,6 +478,75 @@ export default function ShopifyAdminDemo() {
               </div>{" "}
             </Modal.Section>{" "}
           </Modal>
+
+          {addOpen && (
+            <Modal
+              open
+              title="Add New Product"
+              onClose={() => setAddOpen(false)}
+              primaryAction={{
+                content: "Save",
+                onAction: async () => {
+                  await fetch("/api/products", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(newProduct),
+                  });
+                  setAddOpen(false);
+
+                  // Refresh products
+                  const res = await fetch("/api/products");
+                  setProducts(await res.json());
+                },
+              }}
+            >
+              <Modal.Section>
+                <TextField
+                  label="Title"
+                  value={newProduct.title}
+                  onChange={(v) => setNewProduct({ ...newProduct, title: v })}
+                />
+                <TextField
+                  label="Description"
+                  value={newProduct.description}
+                  onChange={(v) =>
+                    setNewProduct({ ...newProduct, description: v })
+                  }
+                />
+                <TextField
+                  label="Price"
+                  type="number"
+                  value={newProduct.price}
+                  onChange={(v) => setNewProduct({ ...newProduct, price: v })}
+                />
+                <TextField
+                  label="Category"
+                  value={newProduct.category}
+                  onChange={(v) =>
+                    setNewProduct({ ...newProduct, category: v })
+                  }
+                />
+                <TextField
+                  label="Vendor"
+                  value={newProduct.vendor}
+                  onChange={(v) => setNewProduct({ ...newProduct, vendor: v })}
+                />
+                <TextField
+                  label="Inventory"
+                  type="number"
+                  value={newProduct.inventory}
+                  onChange={(v) =>
+                    setNewProduct({ ...newProduct, inventory: v })
+                  }
+                />
+                <TextField
+                  label="Image URL"
+                  value={newProduct.image}
+                  onChange={(v) => setNewProduct({ ...newProduct, image: v })}
+                />
+              </Modal.Section>
+            </Modal>
+          )}
 
           {selectedProduct && (
             <Modal
